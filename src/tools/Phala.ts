@@ -17,10 +17,8 @@ export class Phala {
 
     async getPhalaComputationSessions(AccountId32: string): Promise<{ totalReward: number; state: any } | JSON> {
         return await this.api.then(async (api): Promise<{ totalReward: number; state: any }> => {
-            console.log(AccountId32)
             const sessions: any = (await api.query.phalaComputation.sessions(AccountId32)).toJSON()
-            console.log(sessions)
-            return sessions
+            return { totalReward: sessions.stats.totalReward / 1000000000000 , state: sessions.state }
         })
     }
 
@@ -41,6 +39,19 @@ export class Phala {
             const sessions: any = (await api.query.system.account(address)).toJSON()
             return {
                 Balance: sessions.data.free / 1000000000000
+            }
+        })
+    }
+
+    async Transfer(payeeAddress: string, disbursementsKey: string, num: number): Promise<{Hex: string}> {
+        return await this.api.then(async (api): Promise<{Hex: string}> => {
+            const keyring = new Keyring({ type: 'sr25519', ss58Format: 2 });
+            const newPair = keyring.addFromUri(disbursementsKey);
+            const trans = api.tx.balances.transfer(payeeAddress, num * 1000000000000);
+            const trans_hash = (await trans.signAndSend(newPair));
+
+            return {
+                Hex: trans_hash.toHex()
             }
         })
     }

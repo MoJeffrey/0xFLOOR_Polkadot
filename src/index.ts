@@ -38,6 +38,12 @@ app.post('/api/get_balance', async (req, res) => {
     res.send(sessions);
 });
 
+app.post('/api/transfer', async (req, res) => {
+    const jsonData = req.body;
+    const sessions = await phala.Transfer(jsonData['payeeAddress'], jsonData['disbursementsKey'], jsonData['num'])
+    res.send(sessions);
+});
+
 app.listen(port, () => {
     console.log(`Server is listening on port ${port}`);
 });
